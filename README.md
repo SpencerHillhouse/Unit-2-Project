@@ -1,2 +1,1 @@
-# Unit-2-Project
-Unit 2 Project AF
+This program is going to simulate portal that allows for a supervisor or employee to access it, timesheet management, task assignment, task progress, and export information into a new file.
