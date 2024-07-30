@@ -1,9 +1,24 @@
 from dataclasses import dataclass
+import datetime
+
+
+
+now = datetime.datetime.now()
 
 @dataclass
 class System :
-    supervisor : str
-    employee : str
+  on_off : bool
+  admin_access : bool
+
+@dataclass
+class User:
+  is_admin : bool
+  name : str
+  tasks : list
+  phone_number : str
+  email : str
+  time_in : str
+  time_out : str
 
 def timesheet():
     ...
@@ -24,5 +39,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-#Quan did the basic structure can change as needed!!
-#Daniel is pushing just to test. 
