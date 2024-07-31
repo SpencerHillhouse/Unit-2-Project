@@ -49,7 +49,7 @@ def timeclock(current_user, timesheet): #Daniel
         with open(timesheet, "a") as clockOutSheet:
             clockOutSheet.write(f"{current_user.name} Clock-out: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
 
-def createTask(user: User):
+def createTask(user: User):#Spencer
     if user.is_admin:
         new_task = input("Task: ")
         description = input("Description: ")
@@ -146,13 +146,13 @@ def main():
                     while admSignedIn:
                         command = input("You can [view] tasks, [add] tasks, [create] a new user [clock] in/out, or [sign] out. ").lower().strip()
                         if command == "view":
-                            ...
+                            viewTask(current_user)
                         elif command == "add":
-                            ...
+                            createTask(current_user)
                         elif command == "assign":
-                            ...
+                            assignTask()
                         elif command == "create":
-                            ...
+                            create_user()
                         elif command == "clock":
                             timeclock(current_user, timesheet)
                         elif command == "sign":
@@ -170,7 +170,7 @@ def main():
                         print(f"Welcome, {current_user.name}\n")
                         command = input("You can [view] tasks, [update] progress on a task, [clock] in/out, or [sign] out. ").lower().strip()
                         if command == "view":
-                            ...
+                            viewTask(current_user)
                         elif command == "update":
                             ...
                         elif command == "clock":
