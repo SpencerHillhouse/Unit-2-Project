@@ -2,9 +2,6 @@ from dataclasses import dataclass
 import datetime
 from tqdm import tqdm
 
-now = datetime.datetime.now()
-now.strftime("%Y-%m-%d %H:%M:%S")
-
 
 @dataclass
 class System :
@@ -22,13 +19,32 @@ class User:
   time_in : bool
   password : str
 
+def load_users(userList): #Daniel - Loads users into a dictionary from the user-list file
+    users = {}
+    with open(userList, "r") as file:
+        for line in file:
+            userInfo = line.strip().split(',')
+            if len(userInfo) < 8:  #HAS TO CHECK TO MAKE SURE LINE HAS ALL EXPECTED FIELDS
+                continue
+            name = userInfo[0]
+            adminStatus = userInfo[1] == "True"
+            isFirstLogin = userInfo[2] == "True"
+            tasks = userInfo[3].split(',') if userInfo[3] else []
+            phone = userInfo[4]
+            email = userInfo[5]
+            clockedIn = userInfo[6] == "True"
+            password = userInfo[7]
+            users[name] = User(name, adminStatus, isFirstLogin, tasks, phone, email, clockedIn, password)
+    return users
+
 def timeclock(current_user, timesheet): #Daniel
+    now = datetime.datetime.now()
     if current_user.time_in == False: #CLOCKING IN
-        current_user.time_in == True
+        current_user.time_in = True
         print(f"{current_user} has been clocked in.")
         with open(timesheet, "a") as clockInSheet:
             clockInSheet.write(f"{current_user.name} Clock-in: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
-    if current_user.time_in == True: #CLOCKING OUT
+    elif current_user.time_in == True: #CLOCKING OUT
         current_user.time_in = False
         print(f"{current_user} has been clocked out")
         with open(timesheet, "a") as clockOutSheet:
@@ -95,55 +111,72 @@ def create_user(): #Product of Jet
 def main():
     timesheet = "timesheet.txt"
     userList = "user-list.txt"
-    admin = User("Test_Admin", True, False, [], "123-456-7890", "test_admin@company.org", True, "AdminPass!")
-    now.strftime("%Y-%m-%d %H:%M:%S")
-
-    empSignedIn = False
-    admSignedIn = False
 
     print("Hello, welcome to [PROJECT]! \n")
-    current_user = input("Please enter your name to sign-in: ")
 
-    with open(userList, "r") as userList:
-        if current_user in userList.readlines():
-            if current_user.is_admin == False:
-                empSignedIn = True
-            elif current_user.is_admin == True or current_user == admin:
-                admSignedIn = True
-        elif current_user not in userList.readlines():
-            print("User not found. Please contact an admin for assistance.")
+    users = load_users(userList)
 
-    while empSignedIn:
-        print(f"Welcome {current_user.name}\n")
-        command = input("You can [view] tasks, [update] progress on a task, or [clock] in/out.").lower().strip()
-        if command == "view":
-            ...
-        elif command == "update":
-            ...
-        elif command == "clock":
-            timeclock(current_user, timesheet)
-        else:
-            print("Invalid input.")
-    #view tasks, update progress, timeclock
+    admSignedIn = False
+    empSignedIn = False
 
-    while admSignedIn:
-        print(f"Welcome {current_user.name}\n")
-        command = input("You can [view] timesheet, create [tasks], [assign] tasks, create [new] user, or [clock] in/out. ").lower().strip()
-        if command == "view":
-            ...
-        elif command == "tasks":
-            ...
-        elif command == "assign":
-            ...
-        elif command == "new":
-            ...
-        elif command == "clock":
-            ...
-        else:
-            print("Invalid input.")
-    #view timesheet, assign/create tasks, create user, timecock
-    
-    timeclock(current_user,timesheet)
+    while True:
+        username = input("Please enter your name to sign-in: ").strip()
+        password = input("Please enter your password: ").strip()
+
+        current_user = users.get(username)
+        
+        if current_user is None:
+            print("User not found. Please contact your admin for assistance.\n")
+            continue
+
+        if current_user.password != password:
+            print("Incorrect password.\n")
+            continue
+
+        if current_user != None and current_user.password == password:
+            if current_user.is_admin:
+                    print(f"Welcome, Admin {current_user.name}\n")
+                    admSignedIn = True
+                    
+                    while admSignedIn:
+                        command = input("You can [view] tasks, [add] tasks, [create] a new user [clock] in/out, or [sign] out. ").lower().strip()
+                        if command == "view":
+                            ...
+                        elif command == "add":
+                            ...
+                        elif command == "assign":
+                            ...
+                        elif command == "create":
+                            ...
+                        elif command == "clock":
+                            timeclock(current_user, timesheet)
+                        elif command == "sign":
+                            print("Signing out...\n")
+                            admSignedIn = False
+                            break
+                        else:
+                            print("Invalid input.")
+
+            elif current_user.is_admin == False:
+                    print(f"Welcome, {current_user.name}\n")
+                    empSignedIn = True
+                    
+                    while empSignedIn:
+                        print(f"Welcome, {current_user.name}\n")
+                        command = input("You can [view] tasks, [update] progress on a task, [clock] in/out, or [sign] out. ").lower().strip()
+                        if command == "view":
+                            ...
+                        elif command == "update":
+                            ...
+                        elif command == "clock":
+                            timeclock(current_user, timesheet)
+                        elif command == "sign":
+                            print("Signing out...\n")
+                            empSignedIn = False
+                            break
+                        else:
+                            print("Invalid input.")
+
 
 if __name__ == "__main__":
     main()

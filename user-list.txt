@@ -1,0 +1,2 @@
+admin,True,False,,555-1234,admin@example.com,False,admin
+daniel,True,False,,123-4567,daniel@isstupid.com,False,daniel
