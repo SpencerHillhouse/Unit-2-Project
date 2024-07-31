@@ -2,7 +2,6 @@ from dataclasses import dataclass
 import datetime
 from tqdm import tqdm
 
-
 @dataclass
 class System :
   on_off : bool
@@ -50,8 +49,14 @@ def timeclock(current_user, timesheet): #Daniel
         with open(timesheet, "a") as clockOutSheet:
             clockOutSheet.write(f"{current_user.name} Clock-out: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
 
-def createTask():
-    ...
+def createTask(user: User):
+    if user.is_admin:
+        new_task = input("Task: ")
+        description = input("Description: ")
+        user.tasks.append(new_task)
+        user.tasks.append(f"{description}\n")
+    else:
+        raise PermissionError("Only Admins can create a new task.")
 
 def assignTask(employee: User): #Spencer
     if employee.is_admin:
