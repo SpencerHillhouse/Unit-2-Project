@@ -115,14 +115,34 @@ def main():
 
     while empSignedIn:
         print(f"Welcome {current_user.name}\n")
-        command = input("Yo" can [])
+        command = input("You can [view] tasks, [update] progress on a task, or [clock] in/out.").lower().strip()
+        if command == "view":
+            ...
+        elif command == "update":
+            ...
+        elif command == "clock":
+            timeclock(current_user, timesheet)
+        else:
+            print("Invalid input.")
     #view tasks, update progress, timeclock
 
     while admSignedIn:
-        ...
+        print(f"Welcome {current_user.name}\n")
+        command = input("You can [view] timesheet, create [tasks], [assign] tasks, create [new] user, or [clock] in/out. ").lower().strip()
+        if command == "view":
+            ...
+        elif command == "tasks":
+            ...
+        elif command == "assign":
+            ...
+        elif command == "new":
+            ...
+        elif command == "clock":
+            ...
+        else:
+            print("Invalid input.")
     #view timesheet, assign/create tasks, create user, timecock
-
-
+    
     timeclock(current_user,timesheet)
 
 if __name__ == "__main__":
