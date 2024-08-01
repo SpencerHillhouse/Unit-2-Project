@@ -68,16 +68,16 @@ def assignTask(employee: User): #Spencer
         
         
 
-def taskProgress(employee: User):
-    if employee.is_admin == True:
+def taskProgress(user: User): # Quan
+    if user.is_admin == True:
         for i in tqdm (range (100), 
                desc="Loading…", 
                ascii=False, ncols=75):
-            employee.tasks(0.01)
+            user.tasks(0.01)
             print("Task are Complete.")
 
-def viewTask(employee: User):  #temp place holder
-        if employee.is_admin == True:
+def viewTask(user: User):  #temp place holder Quan
+        if user.is_admin == True:
             user_input = input("Name? ")
             for each in user_input:
                 print(each.tasks)
