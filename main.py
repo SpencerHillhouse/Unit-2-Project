@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import datetime
-from tqdm import tqdm
 
 @dataclass
 class System :
@@ -69,11 +68,7 @@ def assignTask(employee: User): #Spencer
         
 
 def taskProgress(user: User): # Quan
-    if user.is_admin == True:
-        for i in tqdm (range (100), 
-               desc="Loading…", 
-               ascii=False, ncols=75):
-            user.tasks(0.01)
+    
             print("Task are Complete.")
 
 def viewTask(user: User):  #temp place holder Quan
