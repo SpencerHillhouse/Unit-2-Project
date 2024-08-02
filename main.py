@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import datetime
+import datetime   
 
 @dataclass
 class System :
@@ -35,6 +35,32 @@ def load_users(userList): #Daniel - Loads users into a dictionary from the user-
             users[name] = User(name, adminStatus, isFirstLogin, tasks, phone, email, clockedIn, password)
     return users
 
+def loaded_user(userList):
+    load = input("Please provide the name of the user you would like to load for the selected progress: ")
+
+    with open(userList, "r") as file:
+        with open(userList, "r") as file:
+            for line in file:
+                userInfo = line.strip().split(',')
+                if userInfo[0] == load:
+                    continue
+                name = userInfo[0]
+                adminStatus = userInfo[1] == "True"
+                isFirstLogin = userInfo[2] == "True"
+                tasks = userInfo[3].split(',') if userInfo[3] else []
+                phone = userInfo[4]
+                email = userInfo[5]
+                clockedIn = userInfo[6] == "True"
+                password = userInfo[7]
+                user_load = User(name, adminStatus, isFirstLogin, tasks, phone, email, clockedIn, password)
+    return user_load
+
+
+
+
+    
+
+    
 def timeclock(current_user, timesheet): #Daniel
     now = datetime.datetime.now()
     if current_user.time_in == False: #CLOCKING IN
@@ -48,40 +74,46 @@ def timeclock(current_user, timesheet): #Daniel
         with open(timesheet, "a") as clockOutSheet:
             clockOutSheet.write(f"{current_user.name} Clock-out: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
 
-def createTask(user: User):#Spencer
-    if user.is_admin:
-        new_task = input("Task: ")
-        description = input("Description: ")
-        user.tasks.append(new_task)
-        user.tasks.append(f"{description}\n")
-    else:
-        raise PermissionError("Only Admins can create a new task.")
+
+
+# def createTask():#Spencer
+        
+#         user.tasks.append(new_task)
+#         user.tasks.append(f"{description}\n")
+    
 
 def assignTask(employee: User): #Spencer
-    if employee.is_admin:
-        pick_task = ("Which task would you like to assign: ")
-        if pick_task in employee.tasks:
-            assign_task = input("\nWho would you like to assign this task to: ")
-            if assign_task == employee:
-                employee.tasks.append(pick_task)
+    assign_task = ("Who would you like to assign this task to: ")
+    if assign_task == employee.name:
+        new_task = input("Task: ")
+        description = input("Description: ")
+        employee.tasks.append([new_task, description])
+    # if pick_task in employee.tasks:
+    #     # assign_task = input("\nWho would you like to assign this task to: ")
+    #     if assign_task == employee:
+    #         employee.tasks.append(pick_task)
         
         
 
-def taskProgress(user: User): # Quan
-    
-            print("Task are Complete.")
+def updatetaskProgress(user: User): # Quan
+    if user.is_admin == False:
+       user_input = input("Name? ")
+       if user_input == user.name :
+        for each in user.tasks:
+           user.tasks.append(each)
+        print("Task Updated.")
 
 def viewTask(user: User):  #temp place holder Quan
-        if user.is_admin == True:
-            user_input = input("Name? ")
-            for each in user_input:
-                print(each.tasks)
-                #change after admins are made
+        user_input = input("Name? ")
+        if user_input in user:
+            for each in user.tasks:
+                print(each)
+                #change after task are made
 
 def create_user(): #Product of Jet 
     is_admin = input("Should this new user have admin access? [Y/N]: ")
     
-    while is_admin != "Y" or is_admin != "N":
+    while is_admin != "Y" and is_admin != "N":
         print("Invalid, please try again.")
         is_admin = input("Should this new user have admin access? [Y/N]: ")
 
@@ -98,7 +130,7 @@ def create_user(): #Product of Jet
     new_user = User(name, is_admin, True,[], phone, email, False, "")
 
     with open("user-list.txt", 'a') as file:
-        file.write(new_user + "\n")
+        file.writelines("\n" + name+"," + str(is_admin)+"," + "True," + "," + phone+"," + email+"," + "False," + "")
 
 
     
@@ -109,6 +141,7 @@ def create_user(): #Product of Jet
     
     
 def main():
+    employee = User("", False, True, [], "", "", False, "")
     timesheet = "timesheet.txt"
     userList = "user-list.txt"
 
@@ -139,13 +172,15 @@ def main():
                     admSignedIn = True
                     
                     while admSignedIn:
-                        command = input("You can [view] tasks, [add] tasks, [create] a new user [clock] in/out, or [sign] out. ").lower().strip()
+                        command = input("You can [view] tasks, [add] tasks, [assign] tasks, [create] a new user [clock] in/out, or [sign] out. ").lower().strip()
                         if command == "view":
                             viewTask(current_user)
                         elif command == "add":
-                            createTask(current_user)
+                            assignTask(current_user)
                         elif command == "assign":
-                            assignTask()
+                            assignTask(loaded_user(userList))
+                            print(loaded_user(userList))
+                            
                         elif command == "create":
                             create_user()
                         elif command == "clock":
@@ -162,7 +197,6 @@ def main():
                     empSignedIn = True
                     
                     while empSignedIn:
-                        print(f"Welcome, {current_user.name}\n")
                         command = input("You can [view] tasks, [update] progress on a task, [clock] in/out, or [sign] out. ").lower().strip()
                         if command == "view":
                             viewTask(current_user)
