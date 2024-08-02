@@ -1,2 +1,3 @@
 admin,True,False,,555-1234,admin@example.com,False,admin
 Logan,True,True,,64815421,asfhlksdjf,False,
+Spencer,False,False,,46548798,spencer@gmail.com,False,spencer

@@ -69,32 +69,30 @@ def timeclock(current_user, timesheet): #Daniel
         print(f"{current_user} has been clocked out")
         with open(timesheet, "a") as clockOutSheet:
             clockOutSheet.write(f"{current_user.name} Clock-out: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
-
-# def createTask():#Spencer
-        
-#         user.tasks.append(new_task)
-#         user.tasks.append(f"{description}\n")
+   
+def updatetaskProgress(current_user): # Quan/Spencer
+    if current_user.tasks == []:
+        print("This employee has no current tasks.")
+    else:
+        updatedTask = input("Which task would you like to update: ")
+        if updatedTask in current_user.tasks:
+            status = input("In progress or Completed: ").capitalize()
+            if status == "In progress":
+                print(f"Task: {updatedTask} (In progress)")
+            elif status == "Completed":
+                print(f"Tasks: {updatedTask} (Completed)")
+                current_user.tasks.remove(updatedTask)
     
-    # if pick_task in employee.tasks:
-    #     # assign_task = input("\nWho would you like to assign this task to: ")
-    #     if assign_task == employee:
-    #         employee.tasks.append(pick_task)
-        
-def updatetaskProgress(user: User): # Quan
-    if user.is_admin == False:
-       user_input = input("Name? ")
-       if user_input == user.name :
-        for each in user.tasks:
-           user.tasks.append(each)
-        print("Task Updated.")
-
-def viewTask():  #temp place holder Quan/Spencer
-        user_input = input("Name: ")
-        if user_input in users.keys():
-            assignedPerson = users[user_input]
+def viewTask(current_user):  #temp place holder Quan/Spencer
+        userTask = input("Who's task would you like to see: ")
+        if userTask in users.keys():
+            assignedPerson = users[userTask]
+        if assignedPerson.tasks == []:
+            print("This employee has no current tasks.")
+        else:
             for each in assignedPerson.tasks:
-                print(f"Task: {each}")
-                #change after task are made
+                print(f"Task: {each} (Uncompleted)")
+                
 
 def create_user(): #Product of Jet 
     is_admin = input("Should this new user have admin access? [Y/N]: ")
@@ -179,7 +177,7 @@ def main():
                         if command == "view":
                             viewTask(current_user)
                         elif command == "update":
-                            ...
+                            updatetaskProgress(current_user)
                         elif command == "clock":
                             timeclock(current_user, timesheet)
                         elif command == "sign":
