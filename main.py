@@ -17,8 +17,10 @@ class User:
   time_in : bool
   password : str
 
+new_task = []
+users = {}
+
 def load_users(userList): #Daniel - Loads users into a dictionary from the user-list file
-    users = {}
     with open(userList, "r") as file:
         for line in file:
             userInfo = line.strip().split(',')
@@ -54,12 +56,6 @@ def loaded_user(userList):
                 password = userInfo[7]
                 user_load = User(name, adminStatus, isFirstLogin, tasks, phone, email, clockedIn, password)
     return user_load
-
-
-
-
-    
-
     
 def timeclock(current_user, timesheet): #Daniel
     now = datetime.datetime.now()
@@ -74,27 +70,16 @@ def timeclock(current_user, timesheet): #Daniel
         with open(timesheet, "a") as clockOutSheet:
             clockOutSheet.write(f"{current_user.name} Clock-out: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
 
-
-
 # def createTask():#Spencer
         
 #         user.tasks.append(new_task)
 #         user.tasks.append(f"{description}\n")
     
-
-def assignTask(employee: User): #Spencer
-    assign_task = ("Who would you like to assign this task to: ")
-    if assign_task == employee.name:
-        new_task = input("Task: ")
-        description = input("Description: ")
-        employee.tasks.append([new_task, description])
     # if pick_task in employee.tasks:
     #     # assign_task = input("\nWho would you like to assign this task to: ")
     #     if assign_task == employee:
     #         employee.tasks.append(pick_task)
         
-        
-
 def updatetaskProgress(user: User): # Quan
     if user.is_admin == False:
        user_input = input("Name? ")
@@ -103,42 +88,38 @@ def updatetaskProgress(user: User): # Quan
            user.tasks.append(each)
         print("Task Updated.")
 
-def viewTask(user: User):  #temp place holder Quan
-        user_input = input("Name? ")
-        if user_input in user:
-            for each in user.tasks:
-                print(each)
+def viewTask():  #temp place holder Quan/Spencer
+        user_input = input("Name: ")
+        if user_input in users.keys():
+            assignedPerson = users[user_input]
+            for each in assignedPerson.tasks:
+                print(f"Task: {each}")
                 #change after task are made
 
 def create_user(): #Product of Jet 
     is_admin = input("Should this new user have admin access? [Y/N]: ")
-    
     while is_admin != "Y" and is_admin != "N":
         print("Invalid, please try again.")
         is_admin = input("Should this new user have admin access? [Y/N]: ")
-
     name = input("Name: ")
     #task will be added in seperate function. 
     phone = input("Phone Number: ")
-    email = input("Email Address: ")
-                
+    email = input("Email Address: ")             
     if is_admin == "Y":
         is_admin = True
     else:
         is_admin = False
-    
     new_user = User(name, is_admin, True,[], phone, email, False, "")
-
     with open("user-list.txt", 'a') as file:
         file.writelines("\n" + name+"," + str(is_admin)+"," + "True," + "," + phone+"," + email+"," + "False," + "")
 
-
-    
-
-    
-
-    ...
-    
+def assignTask(): #Spencer
+    assign_person = input("Who would you like to assign this task to: ")
+    if assign_person in users.keys():
+        assignedPerson = users[assign_person]   
+        task = input("Task: ")
+        assignedPerson.tasks.append(task)
+        print(f"New task has been assigned to {assignedPerson.name}")
     
 def main():
     employee = User("", False, True, [], "", "", False, "")
@@ -174,12 +155,9 @@ def main():
                     while admSignedIn:
                         command = input("You can [view] tasks, [add] tasks, [assign] tasks, [create] a new user [clock] in/out, or [sign] out. ").lower().strip()
                         if command == "view":
-                            viewTask(current_user)
-                        elif command == "add":
-                            assignTask(current_user)
+                            viewTask()
                         elif command == "assign":
-                            assignTask(loaded_user(userList))
-                            print(loaded_user(userList))
+                            assignTask()
                             
                         elif command == "create":
                             create_user()
