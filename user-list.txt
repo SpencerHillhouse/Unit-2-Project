@@ -1,3 +1,0 @@
-admin,True,False,,555-1234,admin@example.com,False,admin
-daniel,True,False,,1234321,email,False,daniel
-spencer,False,False,,1234321,email,False,spencer

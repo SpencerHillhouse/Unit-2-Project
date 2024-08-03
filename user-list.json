@@ -1,0 +1,36 @@
+[
+    {
+        "name": "Admin",
+        "is_admin": true,
+        "is_first_login": false,
+        "tasks": [],
+        "phone_number": "Admin",
+        "email": "Admin",
+        "time_in": false,
+        "password": "admin"
+    },
+    {
+        "name": "Sean",
+        "is_admin": true,
+        "is_first_login": false,
+        "tasks": [],
+        "phone_number": "Admin",
+        "email": "Admin",
+        "time_in": false,
+        "password": "123"
+    },
+    {
+        "name": "Sean",
+        "is_admin": true,
+        "is_first_login": false,
+        "tasks": [],
+        "phone_number": "Admin",
+        "email": "Admin",
+        "time_in": false,
+        "password": "321"
+    },
+    {
+        "name": "test",
+        "is_admin": true,
+        "is_first_login": true,
+        "tasks": 

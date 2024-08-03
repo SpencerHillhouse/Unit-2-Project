@@ -1,226 +1,235 @@
-from dataclasses import dataclass
-import datetime   
+from dataclasses import dataclass, asdict
+from typing import List
+import os
+import json
+import datetime
 
-# @dataclass
-# class System :
-#   on_off : bool
-#   admin_access : bool
+@dataclass
+class EmployeeTasks:
+    name: str
+    description: str
+    status: str
 
 @dataclass
 class User:
-  name: str
-  is_admin : bool
-  is_first_login : bool
-  tasks : list
-  phone_number : str
-  email : str
-  time_in : bool
-  password : str
+    name: str
+    is_admin: bool
+    is_first_login: bool
+    tasks: List
+    phone_number: str
+    email: str
+    time_in: bool
+    password: str
 
-new_task = []
-users = {}
+user_list_file = "user-list.json"
 
-def load_users(userList): #Daniel - Loads users into a dictionary from the user-list file
-    with open(userList, "r") as file:
-        for line in file:
-            userInfo = line.strip().split(',')
-            if len(userInfo) < 8:  #HAS TO CHECK TO MAKE SURE LINE HAS ALL EXPECTED FIELDS
-                continue
-            name = userInfo[0]
-            adminStatus = userInfo[1] == "True"
-            isFirstLogin = userInfo[2] == "True"
-            tasks = userInfo[3].split(',') if userInfo[3] else []
-            phone = userInfo[4]
-            email = userInfo[5]
-            clockedIn = userInfo[6] == "True"
-            password = userInfo[7]
-            users[name] = User(name, adminStatus, isFirstLogin, tasks, phone, email, clockedIn, password)
-    return users
+def save_user(user: User):
+    if not os.path.exists(user_list_file):
+        with open(user_list_file, 'w') as file:
+            json.dump([], file)  # Initialize the file with an empty list
 
-def loaded_user(userList):
-    load = input("Please provide the name of the user you would like to load for the selected progress: ")
+    with open(user_list_file, 'r+') as file:
+        users = json.load(file)
+        users.append(asdict(user))
+        file.seek(0)
+        json.dump(users, file, indent=4)
 
-    with open(userList, "r") as file:
-        with open(userList, "r") as file:
-            for line in file:
-                userInfo = line.strip().split(',')
-                if userInfo[0] == load:
-                    continue
-                name = userInfo[0]
-                adminStatus = userInfo[1] == "True"
-                isFirstLogin = userInfo[2] == "True"
-                tasks = userInfo[3].split(',') if userInfo[3] else []
-                phone = userInfo[4]
-                email = userInfo[5]
-                clockedIn = userInfo[6] == "True"
-                password = userInfo[7]
-                user_load = User(name, adminStatus, isFirstLogin, tasks, phone, email, clockedIn, password)
-    return user_load
-    
-def timeclock(current_user, timesheet): #Daniel
-    now = datetime.datetime.now()
-    if current_user.time_in == False: #CLOCKING IN
-        current_user.time_in = True
-        print(f"{current_user} has been clocked in.")
-        with open(timesheet, "a") as clockInSheet:
-            clockInSheet.write(f"{current_user.name} Clock-in: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
-    elif current_user.time_in == True: #CLOCKING OUT
-        current_user.time_in = False
-        print(f"{current_user} has been clocked out")
-        with open(timesheet, "a") as clockOutSheet:
-            clockOutSheet.write(f"{current_user.name} Clock-out: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
-   
-def updatetaskProgress(current_user): # Quan/Spencer
-    if current_user.tasks == []:
-        print("This employee has no current tasks.")
+def load_users():
+    if os.path.exists(user_list_file):
+        with open(user_list_file, 'r') as file:
+            return json.load(file)
+    return []
+
+def sign_in(updateuser : User):
+    users = load_users()
+    name = input("Please provide your First and Last Name: ").strip().capitalize()
+    search = [user for user in users if name.lower() in user["name"].lower()]
+    if search:
+        print("Welcome " + name.capitalize())
+        password = input("Password: ")
+        user_found = False
+
+        for user in search:
+         if password == user["password"]:
+            updateuser.name = user["name"]
+            updateuser.is_admin = user["is_admin"]
+            updateuser.is_first_login = user["is_first_login"]
+            updateuser.email = user["email"]
+            updateuser.task = user["tasks"]
+            updateuser.phone_number = user["phone_number"]
+            updateuser.password = user["password"]
+            updateuser.time_in = user["time_in"]
+
+            user_found = True
+        if user_found:
+            print("You have signed in. Thank you")
+            return user
+        if not user_found:
+            print("User not found, please contact Admin for assistance.")
     else:
-        updatedTask = input("Which task would you like to update: ")
-        if updatedTask in current_user.tasks:
-            status = input("In progress or Completed: ").capitalize()
-            if status == "In progress":
-                print(f"Task: {updatedTask} (In progress)")
-            elif status == "Completed":
-                print(f"Tasks: {updatedTask} (Completed)")
-                current_user.tasks.remove(updatedTask)
-    
-def viewTask():  #temp place holder Quan/Spencer
-        userTask = input("Who's task would you like to see: ")
-        if userTask in users.keys():
-            assignedPerson = users[userTask]
-        if assignedPerson.tasks == []:
-            print("This employee has no current tasks.")
+        print("incorrect or invalid password.")
+        
+def create_new_user():
+    admin = input("Should this user have Admin Access? |Y/N|: ")
+    if admin.upper() == "Y" or admin.upper()=="N":
+        if admin.upper() == "Y":
+            admin = True
         else:
-            for each in assignedPerson.tasks:
-                print(f"Task: {each} (Uncompleted)")
-                
-
-def create_user(): #Product of Jet 
-    is_admin = input("Should this new user have admin access? [Y/N]: ")
-    while is_admin != "Y" and is_admin != "N":
-        print("Invalid, please try again.")
-        is_admin = input("Should this new user have admin access? [Y/N]: ")
-    name = input("Name: ")
-    #task will be added in seperate function. 
+            admin = False
+    name = input("First and Last Name: ").capitalize()
     phone = input("Phone Number: ")
-    email = input("Email Address: ")             
-    if is_admin == "Y":
-        is_admin = True
-    else:
-        is_admin = False
-    new_user = User(name, is_admin, True,[], phone, email, False, "")
-    with open("user-list.txt", 'a') as file:
-        file.writelines("\n" + name+"," + str(is_admin)+"," + "True," + "," + phone+"," + email+"," + "False," + "")
+    email = input("Email Address: ")
+    newuser = User(name,admin,True,[],phone,email,False,"non")
+    save_user(newuser)
 
-def first_login(current_user, userList): #Daniel
-    if current_user.is_first_login == True:
-        print("\nWelcome! This is your first login.")
+def populate_userTBU(TBU : User):
+    users = load_users()
+    emp_name = input("Name of employee: ")
+    search = [user for user in users if emp_name.lower() in user["name"].lower()]
+    for user in search:
+        TBU.name = user["name"]
+        TBU.is_admin = user["is_admin"]
+        TBU.is_first_login = user["is_first_login"]
+        TBU.email = user["email"]
+        TBU.tasks = user["tasks"]
+        TBU.phone_number = user["phone_number"]
+        TBU.password = user["password"]
+        TBU.time_in = user["time_in"]
+        return TBU
+    
+def update_userJSON(TBU :User):
+    if os.path.exists(user_list_file):
+        with open(user_list_file, 'r') as file:
+            data = json.load(file)
+            for user in data:
+                if user["name"] == TBU.name:
+                    user["name"] = TBU.name
+                    user["is_admin"]=TBU.is_admin
+                    user["is_first_login"] = TBU.is_first_login
+                    user["email"] = TBU.email
+                    user["tasks"] = TBU.tasks
+                    user["phone_number"] = TBU.phone_number
+                    user["password"] = TBU.password
+                    user["time_in"] = TBU.time_in
+                    with open(user_list_file, 'w') as file: 
+                        json.dump(data, file, indent=4) 
 
-        while True:
-            password = input("Please choose a password: ")
-            confirmPassword = input("Please confirm password: ")
+def create_password(user1:User):
+    users = load_users()
+    name = user1.name
+    search = [user for user in users if name.lower() in user["name"].lower()]
+    if search:
+        for user in search:
+            password = input("Please create a password: ")
+            confirm = input("Please re-type your password to confirm: ")
+            while password != confirm:
+                print("Passwords do not match, please try again.")
+                password=""
+                confirm="_"
+                password = input("Please create a password: ")
+                confirm = input("Please re-type your password to confirm: ")
+            user["password"] = password
+            print("You have updated your password!")
+            user1.is_first_login = False
 
-            if password == confirmPassword:
-                current_user.password = password
-                current_user.is_first_login = False
+def timeclock(user, timesheet):
+    now = datetime.datetime.now()
+    if user.time_in == False:
+        user.time_in = True
+        print(f"{user.name} has been clocked in. ")
+        with open(timesheet, "a") as clockInSheet:
+            clockInSheet.write(f"{user.name} Clock-in: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
+    elif user.time_in == True:
+        user.time_in = False
+        print(f"{user.name} has been clocked out. ")
+        with open(timesheet, "a") as clockOutSheet:
+            clockOutSheet.write(f"{user.name} Clock-out: {now.strftime("%Y-%m-%d %H:%M:%S")}\n")
 
-                #updating user-list.txt with password
-                with open(userList, "r") as f:
-                    lines = f.readlines()
-                
-                with open(userList, "w") as f: #HAVE TO USE WRITE TO OVERWRITE THE LINE
-                    for line in lines:
-                        userInfo = line.strip().split(',')
-                        if userInfo[0] == current_user.name:
-                            userInfo[7] = password 
-                            userInfo[2] = "False"
-                            line = ','.join(userInfo)
-                        f.write(line)
-                print("Password set.\n")
-                break
-            else:
-                print("Passwords do not match. Please try again.")
+def create_task(newTask, user_to_be_updated) -> EmployeeTasks:
+    newTask.name = input("Name of task to be completed: ")
+    newTask.description = input("Any additional details/description for this task: ")
+    newTask.status = "Not started."
 
-def assignTask(): #Spencer
-    assign_person = input("Who would you like to assign this task to: ")
-    if assign_person in users.keys():
-        assignedPerson = users[assign_person]   
-        task = input("Task: ")
-        assignedPerson.tasks.append(task)
-        print(f"New task has been assigned to {assignedPerson.name}")
+    user_to_be_updated.tasks = EmployeeTasks(newTask.name, newTask.description, newTask.status)
 
 
 def main():
-    employee = User("", False, True, [], "", "", False, "")
+    user_user = User
+    user_to_be_updated = User
+    newTask = EmployeeTasks
+    
     timesheet = "timesheet.txt"
-    userList = "user-list.txt"
 
-    print("Hello, welcome to [PROJECT]! \n")
-
-    users = load_users(userList)
+    users = load_users()
 
     admSignedIn = False
     empSignedIn = False
 
+    print("Welcome to TaskTycoon")
+
     while True:
-        username = input("Logging in: Please enter your name to sign-in: ").strip()
+        command = input("Please [S]ign-in, or [Q]uit: ").strip().upper()
+        if command.upper() == "Q":
+            break
+        elif command.upper() =="S":
+            sign_in(user_user)
+            if user_user.is_admin:
+                admSignedIn = True
+                
+                while admSignedIn:
+                    command = input("You can [V]iew tasks, [A]ssign tasks, [C]reate a new user, [U]pdate an existing user, [Clock]-in/out, or [S]ign out. ").upper().strip()
+                    if command == "V":
+                        ...
+                    elif command == "A":
+                        populate_userTBU(user_to_be_updated)
+                        create_task(newTask, user_to_be_updated)
+                        update_userJSON(user_to_be_updated)
+                        print(user_to_be_updated)
+                        print(newTask)
+                    elif command == "C":
+                        create_new_user()
+                    elif command == "U":
+                        populate_userTBU(user_to_be_updated)
 
-        current_user = users.get(username)
+                        new_phone = input("Enter new phone number or press enter to keep previous: ")
+                        if new_phone:
+                            user_to_be_updated.phone_number = new_phone
+                        new_email = input("Enter new email address or press enter to keep previous: ")
+                        if new_email:
+                            user_to_be_updated.email = new_email
+                        new_password = input("Enter new password or press enter to keep previous: ")
+                        if new_password:
+                            user_to_be_updated.password = new_password
 
-        if current_user is None:
-            print("User not found. Please contact your admin for assistance.\n")
-            continue
+                        update_userJSON(user_to_be_updated)
+                    elif command == "CLOCK":
+                        timeclock(user_user, timesheet)
+                    elif command == "S":
+                        print("Signing out... ")
+                        admSignedIn = False
+                        break
+                    else:
+                        print("Invalid input. ")
 
-        #Check to see if it is the users first time logging in.
-        first_login(current_user, userList)
+            elif user_user.is_admin == False:
+                empSignedIn = True
 
-        password = input("Logging in: Please enter your password: ").strip()
-
-        if current_user.password != password:
-            print("Incorrect password.\n")
-            continue
-
-        if current_user != None and current_user.password == password:
-            if current_user.is_admin:
-                    print(f"Welcome, Admin {current_user.name}\n")
-                    admSignedIn = True
-                    
-                    while admSignedIn:
-                        command = input("You can [view] tasks, [assign] tasks, [create] a new user [clock] in/out, or [sign] out. ").lower().strip()
-                        if command == "view":
-                            viewTask()
-                        elif command == "assign":
-                            assignTask()
-                        elif command == "create":
-                            create_user()
-                        elif command == "clock":
-                            timeclock(current_user, timesheet)
-                        elif command == "sign":
-                            print("Signing out...\n")
-                            admSignedIn = False
-                            break
-                        else:
-                            print("Invalid input.")
-
-            elif current_user.is_admin == False:
-                    print(f"Welcome, {current_user.name}\n")
-                    empSignedIn = True
-                    
-                    while empSignedIn:
-                        command = input("You can [view] tasks, [update] progress on a task, [clock] in/out, or [sign] out. ").lower().strip()
-                        if command == "view":
-                            viewTask()
-                        elif command == "update":
-                            updatetaskProgress(current_user)
-                        elif command == "clock":
-                            timeclock(current_user, timesheet)
-                        elif command == "sign":
-                            print("Signing out...\n")
-                            empSignedIn = False
-                            break
-                        else:
-                            print("Invalid input.")
-
+                while empSignedIn:
+                    command = input("You can [V]iew your tasks, [U]pdate progress on a task, [Clock]-in/out, or [S]ign out. ").upper().strip()
+                    if command == "V":
+                        ...
+                    elif command == "U":
+                        ...
+                    elif command == "CLOCK":
+                        timeclock(user_user, timesheet)
+                    elif command == "S":
+                        print("Signing out... ")
+                        empSignedIn = False
+                        break
+                    else:
+                        print("Invalid input. ")
+        else:
+            print("Invalid input.")
 
 if __name__ == "__main__":
     main()
-
